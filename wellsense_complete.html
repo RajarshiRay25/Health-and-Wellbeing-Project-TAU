@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WellSense Tampere — Complete Project</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0e14;--surf:#111520;--raised:#181d2c;--hover:#1f2538;
+  --border:rgba(255,255,255,0.06);--bmd:rgba(255,255,255,0.11);
+  --text:#dde3f0;--text2:#7b85a0;--text3:#3a4157;
+  --teal:#20c987;--teal2:#14a36d;--teal-bg:rgba(32,201,135,0.09);
+  --blue:#4e9cf5;--blue-bg:rgba(78,156,245,0.09);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.09);
+  --red:#f05353;--red-bg:rgba(240,83,83,0.09);
+  --rose:#f06292;--rose-bg:rgba(240,98,146,0.09);
+  --purple:#a78bfa;--purple-bg:rgba(167,139,250,0.09);
+  --r:12px;--rl:18px;--rxl:26px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-thumb{background:var(--bmd);border-radius:2px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(11,14,20,0.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.nav-left{display:flex;align-items:center;gap:10px}
+.nav-gem{width:28px;height:28px;background:var(--teal);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.nav-title{font-size:14px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.nav-sub{font-size:10px;color:var(--text3);font-family:'DM Mono',monospace}
+.nav-links{display:flex;gap:2px}
+.nav-link{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);padding:5px 11px;border-radius:20px;cursor:pointer;transition:color .15s,background .15s;border:none;background:none;letter-spacing:.02em}
+.nav-link:hover{color:var(--text);background:var(--raised)}
+.nav-link.active{color:var(--teal);background:var(--teal-bg)}
+
+/* ── LAYOUT ── */
+.page{max-width:1100px;margin:0 auto;padding:0 28px}
+section{padding:90px 0 70px}
+section:first-of-type{padding-top:118px}
+.divider{height:1px;background:var(--border);max-width:1100px;margin:0 auto 0 auto;padding:0 28px}
+.divider-inner{height:1px;background:var(--border)}
+
+/* ── TYPOGRAPHY ── */
+.eyebrow{font-family:'DM Mono',monospace;font-size:10px;color:var(--teal);text-transform:uppercase;letter-spacing:.12em;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.eyebrow::before{content:'';width:22px;height:1px;background:var(--teal);opacity:.5}
+.sec-title{font-size:clamp(26px,3.8vw,42px);font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1.1;margin-bottom:16px}
+.sec-title em{font-style:italic;font-family:'Lora',serif;color:var(--teal);font-weight:400}
+.sec-body{font-size:15px;color:var(--text2);line-height:1.8;max-width:660px;font-weight:400}
+
+/* ── BADGES ── */
+.badge{font-family:'DM Mono',monospace;font-size:10px;padding:4px 11px;border-radius:20px;border:1px solid;letter-spacing:.04em}
+.b-teal{color:var(--teal);background:var(--teal-bg);border-color:rgba(32,201,135,.22)}
+.b-blue{color:var(--blue);background:var(--blue-bg);border-color:rgba(78,156,245,.22)}
+.b-amber{color:var(--amber);background:var(--amber-bg);border-color:rgba(245,166,35,.22)}
+.b-rose{color:var(--rose);background:var(--rose-bg);border-color:rgba(240,98,146,.22)}
+.b-purple{color:var(--purple);background:var(--purple-bg);border-color:rgba(167,139,250,.22)}
+
+/* ── SCROLL REVEAL ── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .5s ease,transform .5s ease}
+.reveal.visible{opacity:1;transform:none}
+.d1{transition-delay:.05s}.d2{transition-delay:.11s}.d3{transition-delay:.17s}.d4{transition-delay:.23s}
+
+/* pulse dot */
+.pdot{width:7px;height:7px;border-radius:50%;background:var(--teal);animation:pdotAnim 1.8s infinite}
+@keyframes pdotAnim{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.35)}}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION 1 — HERO
+══════════════════════════════════════════════════════════════════ */
+#hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-top:80px}
+.hero-grid{display:grid;grid-template-columns:1.1fr 1fr;gap:56px;align-items:center}
+.city-tag{display:inline-flex;align-items:center;gap:7px;background:var(--raised);border:1px solid var(--border);border-radius:20px;padding:5px 14px;font-size:12px;color:var(--text2);margin-bottom:22px}
+.badge-row{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:20px}
+.hero-title{font-size:clamp(34px,5.2vw,62px);font-weight:800;letter-spacing:-.04em;line-height:1.05;margin-bottom:20px;color:var(--text)}
+.hero-title em{font-family:'Lora',serif;font-style:italic;color:var(--teal);font-weight:400}
+.hero-desc{font-size:18px;color:var(--text2);line-height:1.78;max-width:500px;margin-bottom:28px;font-weight:400}
+.cta-row{display:flex;gap:10px;flex-wrap:wrap}
+.btn-p{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;background:var(--teal);color:#000;border:none;border-radius:10px;padding:11px 22px;cursor:pointer;transition:opacity .15s,transform .15s}
+.btn-p:hover{opacity:.86;transform:translateY(-1px)}
+.btn-g{font-family:'Syne',sans-serif;font-size:13px;font-weight:600;background:transparent;color:var(--text2);border:1px solid var(--bmd);border-radius:10px;padding:11px 22px;cursor:pointer;transition:color .15s,border-color .15s}
+.btn-g:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.hero-stats{display:flex;flex-direction:column;gap:12px}
+.stat-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;display:flex;align-items:center;gap:14px;transition:border-color .2s,transform .2s;cursor:default}
+.stat-card:hover{border-color:var(--bmd);transform:translateX(4px)}
+.stat-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.stat-num{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1}
+.stat-lbl{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.4}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION 2 — PROBLEM
+══════════════════════════════════════════════════════════════════ */
+.prob-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:36px}
+.prob-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--rl);padding:22px;transition:border-color .2s,transform .2s;cursor:default}
+.prob-card:hover{border-color:var(--bmd);transform:translateY(-3px)}
+.prob-emoji{font-size:26px;margin-bottom:13px;display:block}
+.prob-title{font-size:14px;font-weight:700;color:var(--text);margin-bottom:7px}
+.prob-desc{font-size:12px;color:var(--text2);line-height:1.65}
+.prob-quote{margin-top:13px;padding:9px 11px;background:var(--raised);border-left:2px solid var(--teal);border-radius:0 7px 7px 0;font-family:'Lora',serif;font-style:italic;font-size:11px;color:var(--text2);line-height:1.6}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION 3 — EVENT + PARTNERS
+══════════════════════════════════════════════════════════════════ */
+.event-layout{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:36px;align-items:start}
+.event-visual{background:var(--surf);border:1px solid var(--border);border-radius:var(--rl);padding:24px;position:relative;overflow:hidden}
+.event-visual::before{content:'';position:absolute;top:-40px;right:-40px;width:150px;height:150px;border-radius:50%;background:radial-gradient(circle,rgba(32,201,135,.05) 0%,transparent 70%);pointer-events:none}
+.ev-head{font-size:12px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.ev-items{display:flex;flex-direction:column;gap:9px}
+.ev-item{display:flex;align-items:center;gap:11px;background:var(--raised);border:1px solid var(--border);border-radius:9px;padding:11px 13px;transition:border-color .15s}
+.ev-item:hover{border-color:var(--bmd)}
+.ev-ico{font-size:18px;width:32px;text-align:center;flex-shrink:0}
+.ev-name{font-size:12px;font-weight:600;color:var(--text)}
+.ev-sub{font-size:10px;color:var(--text2);margin-top:1px}
+.partners-col{display:flex;flex-direction:column;gap:10px}
+.sec-mini-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:6px}
+.partner-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:13px;transition:border-color .15s,transform .15s;cursor:default}
+.partner-card:hover{border-color:var(--bmd);transform:translateX(3px)}
+.p-logo{width:38px;height:38px;border-radius:9px;background:var(--raised);border:1px solid var(--bmd);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.p-name{font-size:12px;font-weight:700;color:var(--text)}
+.p-role{font-size:10px;color:var(--text2);margin-top:1px}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION 4 — WEARABLE DEVICE
+══════════════════════════════════════════════════════════════════ */
+.device-section{display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:36px;align-items:start}
+.device-frame{display:flex;flex-direction:column;align-items:center}
+.wrist-scene{position:relative;width:300px;height:390px;margin:0 auto}
+.wrist-arm{position:absolute;bottom:0;left:50%;transform:translateX(-50%);width:110px;height:300px;background:linear-gradient(180deg,#2a2015 0%,#1e1810 60%,#141008 100%);border-radius:55px 55px 18px 18px;border:1px solid rgba(255,255,255,0.05);overflow:hidden}
+.wrist-arm::after{content:'';position:absolute;top:0;left:16px;right:16px;height:100%;background:linear-gradient(180deg,rgba(255,255,255,.03) 0%,transparent 40%);border-radius:40px 40px 0 0}
+.strap-top{position:absolute;top:36px;left:50%;transform:translateX(-50%);width:108px;height:52px;background:#1a2535;border-radius:7px 7px 0 0;border:1px solid rgba(78,156,245,.18);border-bottom:none;z-index:2}
+.strap-bot{position:absolute;bottom:84px;left:50%;transform:translateX(-50%);width:108px;height:56px;background:#1a2535;border-radius:0 0 7px 7px;border:1px solid rgba(78,156,245,.18);border-top:none;z-index:2}
+.strap-hole{position:absolute;bottom:14px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:var(--bg);border:1px solid rgba(78,156,245,.3)}
+.device-body{position:absolute;top:78px;left:50%;transform:translateX(-50%);width:120px;height:140px;background:#111827;border-radius:26px;border:1.5px solid rgba(78,156,245,.28);z-index:3;box-shadow:0 0 36px rgba(32,201,135,.07),0 0 0 1px rgba(255,255,255,.03);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;overflow:hidden}
+.device-body::before{content:'';position:absolute;top:0;left:14px;right:14px;height:1px;background:linear-gradient(90deg,transparent,rgba(78,156,245,.35),transparent)}
+.dev-screen{width:94px;height:94px;background:#0d1220;border-radius:15px;border:1px solid rgba(255,255,255,.05);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;position:relative;overflow:hidden}
+.dev-glow{position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:56px;height:56px;background:radial-gradient(circle,rgba(32,201,135,.13) 0%,transparent 70%);pointer-events:none}
+.dev-hr{font-family:'DM Mono',monospace;font-size:24px;font-weight:500;color:var(--teal);line-height:1;animation:hrFlicker 2s infinite}
+@keyframes hrFlicker{0%,90%,100%{opacity:1}95%{opacity:.65}}
+.dev-lbl{font-family:'DM Mono',monospace;font-size:7px;color:var(--text3);letter-spacing:.1em;text-transform:uppercase}
+.dev-bars{display:flex;gap:2px;align-items:flex-end;height:16px;margin-top:2px}
+.dev-bar{width:4px;background:var(--teal);border-radius:1px;animation:barA 1.4s infinite}
+.dev-bar:nth-child(1){height:7px;animation-delay:0s}
+.dev-bar:nth-child(2){height:13px;animation-delay:.1s}
+.dev-bar:nth-child(3){height:9px;animation-delay:.2s}
+.dev-bar:nth-child(4){height:15px;animation-delay:.3s}
+.dev-bar:nth-child(5){height:8px;animation-delay:.4s}
+.dev-bar:nth-child(6){height:11px;animation-delay:.5s}
+@keyframes barA{0%,100%{opacity:.35}50%{opacity:.9}}
+.dev-sbtn{position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:4px;height:26px;background:#1e2a3e;border-radius:0 3px 3px 0;border:1px solid rgba(78,156,245,.18);border-left:none}
+.sensor-row{display:flex;gap:5px;margin-top:2px}
+.sdot{width:6px;height:6px;border-radius:50%}
+.sdot-g1{background:var(--teal);animation:sP 2s infinite}
+.sdot-g2{background:var(--teal);animation:sP 2s .3s infinite}
+.sdot-r{background:#ff6b6b;animation:sP 2s .6s infinite}
+@keyframes sP{0%,100%{opacity:.35}50%{opacity:1}}
+.ble-arcs{position:absolute;top:54px;right:28px;z-index:4}
+.ble-arc{position:absolute;border:1.5px solid rgba(78,156,245,.38);border-radius:50%;animation:bleE 2s infinite}
+.ble-arc:nth-child(1){width:16px;height:16px;top:-8px;left:-8px;animation-delay:0s}
+.ble-arc:nth-child(2){width:28px;height:28px;top:-14px;left:-14px;animation-delay:.3s}
+.ble-arc:nth-child(3){width:40px;height:40px;top:-20px;left:-20px;animation-delay:.6s}
+.ble-center{width:7px;height:7px;border-radius:50%;background:var(--blue);position:absolute;top:-3.5px;left:-3.5px}
+@keyframes bleE{0%{opacity:.55;transform:scale(.8)}100%{opacity:0;transform:scale(1.45)}}
+.dev-label{margin-top:18px;text-align:center}
+.dev-name{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px}
+.dev-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3)}
+.specs-panel{display:flex;flex-direction:column;gap:11px}
+.spec-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;display:flex;align-items:flex-start;gap:13px;transition:border-color .15s;cursor:default}
+.spec-card:hover{border-color:var(--bmd)}
+.spec-icon{width:34px;height:34px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.si-teal{background:var(--teal-bg);border:1px solid rgba(32,201,135,.2)}
+.si-blue{background:var(--blue-bg);border:1px solid rgba(78,156,245,.2)}
+.si-amber{background:var(--amber-bg);border:1px solid rgba(245,166,35,.2)}
+.si-red{background:var(--red-bg);border:1px solid rgba(240,83,83,.2)}
+.spec-name{font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px}
+.spec-desc{font-size:10px;color:var(--text2);line-height:1.55}
+.spec-tag{display:inline-block;font-family:'DM Mono',monospace;font-size:8px;color:var(--teal);background:var(--teal-bg);padding:2px 7px;border-radius:8px;margin-top:5px;letter-spacing:.03em}
+
+/* reg flow steps */
+.steps-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;position:relative;margin-top:36px}
+.steps-grid::before{content:'';position:absolute;top:31px;left:12.5%;right:12.5%;height:1px;background:linear-gradient(90deg,var(--teal),var(--blue),var(--amber),var(--teal));opacity:.2;z-index:0}
+.step-card{display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 14px 20px;position:relative;z-index:1}
+.step-num{width:62px;height:62px;border-radius:50%;background:var(--surf);border:1px solid var(--bmd);display:flex;align-items:center;justify-content:center;font-size:20px;margin-bottom:13px;position:relative;transition:all .2s}
+.step-card.pulse-step .step-num{background:var(--teal-bg);border-color:rgba(32,201,135,.38)}
+.step-ring{position:absolute;inset:-5px;border-radius:50%;border:1.5px solid var(--teal);opacity:0;animation:ringP 2.5s infinite}
+.pulse-step .step-ring{opacity:1}
+@keyframes ringP{0%,100%{transform:scale(1);opacity:.45}50%{transform:scale(1.12);opacity:.12}}
+.step-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.step-desc{font-size:10px;color:var(--text2);line-height:1.6}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION 5 — LIVE DASHBOARD
+══════════════════════════════════════════════════════════════════ */
+#dashboard-section{padding-bottom:0}
+.dash-wrapper{background:var(--surf);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden;margin-top:36px}
+.dash-topbar{height:48px;background:var(--raised);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0}
+.dtb-left{display:flex;align-items:center;gap:10px}
+.dtb-logo{width:26px;height:26px;background:var(--teal);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px}
+.dtb-title{font-size:13px;font-weight:700;color:var(--text)}
+.dtb-right{display:flex;align-items:center;gap:8px}
+.dtb-chip{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);background:var(--hover);border:1px solid var(--border);padding:3px 9px;border-radius:14px}
+.live-chip{display:flex;align-items:center;gap:5px;background:var(--teal-bg);border:1px solid rgba(32,201,135,.22);color:#5fcfaa;font-family:'DM Mono',monospace;font-size:10px;padding:3px 9px;border-radius:14px}
+.dash-body{display:grid;grid-template-columns:220px 1fr;height:520px}
+.dash-sidebar{background:rgba(17,21,32,.7);border-right:1px solid var(--border);overflow-y:auto;padding:12px 0}
+.ds-label{padding:0 13px 9px;font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em}
+.pcard{padding:8px 13px;cursor:pointer;border-left:3px solid transparent;transition:background .12s,border-color .12s}
+.pcard:hover{background:var(--hover)}
+.pcard.active{background:var(--teal-bg);border-left-color:var(--teal)}
+.pc-row{display:flex;align-items:center;gap:9px}
+.pc-av{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0}
+.pc-name{font-size:11px;font-weight:600;color:var(--text)}
+.pc-meta{font-size:9px;color:var(--text3);margin-top:1px}
+.pc-pill{display:inline-flex;align-items:center;font-size:8px;font-weight:600;padding:1px 6px;border-radius:8px;margin-top:3px;border:1px solid}
+.pp-low{background:var(--teal-bg);color:#5fcfaa;border-color:rgba(32,201,135,.2)}
+.pp-mod{background:var(--amber-bg);color:#f0b549;border-color:rgba(245,166,35,.2)}
+.pp-high{background:var(--red-bg);color:#f07070;border-color:rgba(240,83,83,.2)}
+.pp-stable{background:var(--blue-bg);color:#74b3f0;border-color:rgba(78,156,245,.2)}
+.ds-summary{margin:12px 10px 0;background:var(--raised);border:1px solid var(--border);border-radius:var(--r);padding:10px}
+.dss-row{display:flex;justify-content:space-between;font-size:10px;padding:3px 0}
+.dss-k{color:var(--text3)}.dss-v{color:var(--text);font-weight:600}
+.dss-v.ok{color:#5fcfaa}.dss-v.warn{color:#f07070}
+.dash-content{overflow-y:auto;padding:16px 18px;background:var(--bg)}
+.alert-strip{display:none;align-items:center;gap:9px;background:var(--red-bg);border:1px solid rgba(240,83,83,.22);border-radius:var(--r);padding:9px 13px;margin-bottom:14px;font-size:10px;color:#f07070}
+.alert-icon{width:16px;height:16px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:9px;color:#fff;flex-shrink:0}
+.dc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:10px}
+.dc-title{font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.dc-meta{font-size:10px;color:var(--text3)}
+.dc-btns{display:flex;gap:7px}
+.dc-btn{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);background:var(--raised);border:1px solid var(--bmd);padding:5px 11px;border-radius:8px;cursor:pointer;transition:color .12s,background .12s}
+.dc-btn:hover{background:var(--hover);color:var(--text)}
+.phase-legend{display:flex;gap:12px;margin-bottom:7px}
+.ph-i{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text3)}
+.ph-d{width:7px;height:7px;border-radius:2px}
+.phase-bar{display:flex;height:4px;border-radius:3px;overflow:hidden;background:var(--raised);margin-bottom:5px}
+.pb-base{background:rgba(78,156,245,.45)}.pb-int{background:var(--teal)}.pb-rec{background:rgba(245,166,35,.3)}
+.phase-times{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:8px;color:var(--text3);margin-bottom:14px}
+.metrics-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin-bottom:14px}
+.mc{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;transition:border-color .15s}
+.mc:hover{border-color:var(--bmd)}
+.mc-lbl{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.mc-val{font-size:19px;font-weight:700;color:var(--text)}
+.mc-unit{font-size:10px;color:var(--text3);font-weight:400}
+.mc-delta{font-size:9px;margin-top:2px;color:var(--text3)}
+.du{color:#5fcfaa}.dw{color:#f0b549}.dd{color:#f07070}
+.tab-row{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px}
+.tab{font-family:'DM Mono',monospace;font-size:10px;padding:7px 12px;cursor:pointer;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s;user-select:none}
+.tab:hover{color:var(--text2)}
+.tab.active{color:#5fcfaa;border-bottom-color:var(--teal);font-weight:500}
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px}
+.chart-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px}
+.chart-title{font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px}
+.chart-wrap{position:relative;height:88px}
+.group-section{background:var(--surf);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:11px}
+.group-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px;margin-top:10px}
+.group-cell{background:var(--raised);border:1px solid var(--border);border-radius:8px;padding:9px 5px;text-align:center;cursor:pointer;transition:border-color .12s}
+.group-cell:hover{border-color:var(--bmd)}
+.gc-id{font-family:'DM Mono',monospace;font-size:8px;color:var(--text3)}
+.gc-hr{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--text);margin:2px 0}
+
+/* ══════════════════════════════════════════════════════════════════
+   SECTION 6 — IMPACT + TIMELINE
+══════════════════════════════════════════════════════════════════ */
+.impact-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:36px}
+.impact-card{background:var(--surf);border:1px solid var(--border);border-radius:var(--rl);padding:22px 18px;text-align:center;transition:border-color .2s,transform .2s;cursor:default}
+.impact-card:hover{border-color:var(--bmd);transform:translateY(-3px)}
+.impact-num{font-size:34px;font-weight:800;letter-spacing:-.04em;line-height:1;margin-bottom:6px}
+.impact-lbl{font-size:11px;color:var(--text2);line-height:1.5}
+.timeline{margin-top:36px;position:relative;padding-left:26px}
+.timeline::before{content:'';position:absolute;left:7px;top:8px;bottom:8px;width:1px;background:linear-gradient(180deg,var(--teal),var(--blue),rgba(255,255,255,0));opacity:.28}
+.tl-item{position:relative;margin-bottom:24px;padding-left:18px}
+.tl-item::before{content:'';position:absolute;left:-20px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--surf);border:2px solid var(--teal);transition:background .2s}
+.tl-item:hover::before{background:var(--teal)}
+.tl-phase{font-family:'DM Mono',monospace;font-size:9px;color:var(--teal);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.tl-name{font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px}
+.tl-desc{font-size:12px;color:var(--text2);line-height:1.65}
+
+/* ══════════════════════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════════════════════ */
+footer{background:var(--surf);border-top:1px solid var(--border);padding:52px 28px;text-align:center;margin-top:0}
+.ft-label{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:22px}
+.partner-logos{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:36px}
+.pl-chip{font-size:11px;font-weight:600;color:var(--text2);background:var(--raised);border:1px solid var(--border);padding:7px 16px;border-radius:20px;transition:color .15s,border-color .15s;cursor:default}
+.pl-chip:hover{color:var(--text);border-color:var(--bmd)}
+.ft-note{font-family:'DM Mono',monospace;font-size:10px;color:var(--text3)}
+
+/* ── RESPONSIVE ── */
+@media(max-width:860px){
+  .hero-grid{grid-template-columns:1fr}
+  .hero-stats{flex-direction:row;flex-wrap:wrap}
+  .stat-card{flex:1;min-width:140px}
+  .prob-grid{grid-template-columns:1fr}
+  .event-layout{grid-template-columns:1fr}
+  .device-section{grid-template-columns:1fr}
+  .steps-grid{grid-template-columns:1fr 1fr}
+  .steps-grid::before{display:none}
+  .impact-row{grid-template-columns:1fr 1fr}
+  .dash-body{grid-template-columns:1fr;height:auto}
+  .dash-sidebar{display:none}
+  .metrics-grid{grid-template-columns:1fr 1fr}
+  .charts-row{grid-template-columns:1fr}
+  .group-grid{grid-template-columns:repeat(4,1fr)}
+  .nav-links{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- ── NAV ── -->
+<nav>
+  <div class="nav-left">
+    <div class="nav-gem">💚</div>
+    <div>
+      <div class="nav-title">WellSense Tampere</div>
+      <div class="nav-sub">Elderly Well-Being Initiative 2025</div>
+    </div>
+  </div>
+  <div class="nav-links">
+    <button class="nav-link active" onclick="goTo('hero')">Overview</button>
+    <button class="nav-link" onclick="goTo('problem')">Problem</button>
+    <button class="nav-link" onclick="goTo('event')">Social Event</button>
+    <button class="nav-link" onclick="goTo('device')">Device</button>
+    <button class="nav-link" onclick="goTo('dashboard-section')">Dashboard</button>
+    <button class="nav-link" onclick="goTo('impact')">Impact</button>
+  </div>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════════
+  HERO
+════════════════════════════════════════════════════════════════ -->
+<div class="page"><section id="hero">
+  <div class="hero-grid">
+    <div>
+      <div class="city-tag"><div class="pdot"></div>Tampere, Finland · Hakametsä Sports Centre</div>
+      <div class="badge-row">
+        <div class="badge b-teal" style="font-size:12px;">Tampere University</div>
+        <div class="badge b-blue" style="font-size:12px;">Biomedical Engineering</div>
+        <div class="badge b-amber" style="font-size:12px;">Community Health 2025</div>
+      </div>
+      <h1 class="hero-title">Reconnecting<br><em>elderly lives</em><br>through science<br>&amp; community</h1>
+      <p class="hero-desc">A Tampere University initiative combining warm community social events, on-site medical professionals, and wearable biosensing technology to fight loneliness and monitor the psychological and physiological well-being of elderly residents.</p>
+      <div class="cta-row">
+        <button class="btn-p" onclick="goTo('problem')">Explore the project ↓</button>
+        <button class="btn-g" onclick="goTo('dashboard-section')">See live dashboard</button>
+      </div>
+    </div>
+    <div class="hero-stats">
+      <div class="stat-card reveal d1">
+        <div class="stat-icon" style="background:var(--teal-bg);border:1px solid rgba(32,201,135,.2);">🤝</div>
+        <div><div class="stat-num" style="color:var(--teal);">5</div><div class="stat-lbl" style="font-size:14px">Partner organisations collaborating across Tampere</div></div>
+      </div>
+      <div class="stat-card reveal d2">
+        <div class="stat-icon" style="background:var(--blue-bg);border:1px solid rgba(78,156,245,.2);">👴</div>
+        <div><div class="stat-num" style="color:var(--blue);">#1</div><div class="stat-lbl" style="font-size:14px">Challenge identified: loneliness &amp; unspoken depression</div></div>
+      </div>
+      <div class="stat-card reveal d3">
+        <div class="stat-icon" style="background:var(--amber-bg);border:1px solid rgba(245,166,35,.2);">⌚</div>
+        <div><div class="stat-num" style="color:var(--amber);">4</div><div class="stat-lbl" style="font-size:14px">Biomedical sensors per wearable monitoring physiological signals</div></div>
+      </div>
+      <div class="stat-card reveal d4">
+        <div class="stat-icon" style="background:var(--rose-bg);border:1px solid rgba(240,98,146,.2);">☕</div>
+        <div><div class="stat-num" style="color:var(--rose);">1</div><div class="stat-lbl" style="font-size:14px">Community social event — coffee, pulla &amp; human connection</div></div>
+      </div>
+    </div>
+  </div>
+</section></div>
+<div class="divider"><div class="divider-inner"></div></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  PROBLEM
+════════════════════════════════════════════════════════════════ -->
+<div class="page"><section id="problem">
+  <div class="eyebrow">What we found</div>
+  <h2 class="sec-title">Loneliness is a <em>silent health crisis</em></h2>
+  <p class="sec-body">After visiting Hakametsä Sports Centre and spending time with elderly residents in Tampere, our team identified a pattern that doesn't show up on x-rays — but causes real, measurable physiological harm.</p>
+  <div class="prob-grid">
+    <div class="prob-card reveal d1">
+      <span class="prob-emoji">🏠</span>
+      <div class="prob-title">Social isolation</div>
+      <div class="prob-desc">Many elderly residents in Tampere live alone. As friends and family members pass away, social circles shrink dramatically — leaving few regular human interactions each week.</div>
+      <div class="prob-quote">"They would light up when someone just sat down and asked how they were doing."</div>
+    </div>
+    <div class="prob-card reveal d2">
+      <span class="prob-emoji">💭</span>
+      <div class="prob-title">Unspoken depression</div>
+      <div class="prob-desc">Grief from losing spouses, siblings, and friends accumulates silently. Many elderly people don't want to be a burden — so they hold it in, making it hard for professionals to recognise and help.</div>
+      <div class="prob-quote">"They don't want to share much — they feel they shouldn't complain, even when they're struggling."</div>
+    </div>
+    <div class="prob-card reveal d3">
+      <span class="prob-emoji">🩺</span>
+      <div class="prob-title">Invisible physiological signals</div>
+      <div class="prob-desc">Chronic loneliness elevates cortisol, disrupts heart rate variability, and raises skin conductance baselines. These stress responses often go undetected until they become serious clinical conditions.</div>
+      <div class="prob-quote">"We needed an objective way to see what their bodies were telling us — not just their words."</div>
+    </div>
+  </div>
+</section></div>
+<div class="divider"><div class="divider-inner"></div></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  EVENT + PARTNERS
+════════════════════════════════════════════════════════════════ -->
+<div class="page"><section id="event">
+  <div class="eyebrow">Our solution</div>
+  <h2 class="sec-title">A community social event <em>with purpose</em></h2>
+  <div><p class="sec-body" style="font-size: 14px;">Not a clinical study. Not a hospital visit. A warm, informal gathering where elderly residents come for free coffee, fresh pulla, good conversation — and where we quietly listen to what their bodies have to say.</p>
+  <div class="event-layout">
+    <div class="event-visual reveal d1">
+      <div class="ev-head">What happens at the event <span class="badge b-teal" style="font-size:9px;">Informal · Free · Open</span></div>
+      <div class="ev-items">
+        <div class="ev-item"><div class="ev-ico">☕</div><div><div class="ev-name">Free coffee &amp; pulla</div><div class="ev-sub">Traditional Finnish hospitality — familiar and comforting</div></div></div>
+        <div class="ev-item"><div class="ev-ico">🩺</div><div><div class="ev-name">On-site medical professionals</div><div class="ev-sub">Doctors &amp; nurses present informally — not clinical, just available</div></div></div>
+        <div class="ev-item"><div class="ev-ico">🗣️</div><div><div class="ev-name">Open conversation</div><div class="ev-sub">Staff listen to concerns, share stories, offer informal guidance</div></div></div>
+        <div class="ev-item"><div class="ev-ico">⌚</div><div><div class="ev-name">Voluntary wristband monitoring</div><div class="ev-sub">Participants opt in — biosignals collected anonymously</div></div></div>
+        <div class="ev-item"><div class="ev-ico">🚌</div><div><div class="ev-name">Free NYSSE transport</div><div class="ev-sub">Bus service coordinated so no one is excluded due to mobility</div></div></div>
+      </div>
+    </div>
+    <div class="partners-col">
+      <div class="sec-mini-label">Collaborating partners</div>
+      <div class="partner-card reveal d1"><div class="p-logo">🎓</div><div><div class="p-name">Tampere University</div><div class="p-role">Lead research institution — engineering &amp; project conception</div></div><div class="badge b-blue" style="margin-left:auto;font-size:9px;">Lead</div></div>
+      <div class="partner-card reveal d2"><div class="p-logo">🏙️</div><div><div class="p-name">City of Tampere</div><div class="p-role">Venue support, sponsorship &amp; community coordination</div></div><div class="badge b-amber" style="margin-left:auto;font-size:9px;">Sponsor</div></div>
+      <div class="partner-card reveal d2"><div class="p-logo">🏥</div><div><div class="p-name">Pirha Healthcare</div><div class="p-role">Medical professionals &amp; healthcare oversight on-site</div></div><div class="badge b-teal" style="margin-left:auto;font-size:9px;">Medical</div></div>
+      <div class="partner-card reveal d3"><div class="p-logo">🏊</div><div><div class="p-name">Hakametsä Sports Centre</div><div class="p-role">Venue host &amp; existing elderly community network</div></div><div class="badge b-teal" style="margin-left:auto;font-size:9px;">Venue</div></div>
+      <div class="partner-card reveal d4"><div class="p-logo">🚌</div><div><div class="p-name">NYSSE Transport</div><div class="p-role">Free bus service ensuring all residents can attend</div></div><div class="badge b-amber" style="margin-left:auto;font-size:9px;">Transport</div></div>
+    </div>
+  </div>
+</section></div>
+<div class="divider"><div class="divider-inner"></div></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  WEARABLE DEVICE
+════════════════════════════════════════════════════════════════ -->
+<div class="page"><section id="device">
+  <div class="eyebrow">Biomedical engineering</div>
+  <h2 class="sec-title">The <em>WellSense Band</em> — how it works</h2>
+  <p class="sec-body">A lightweight wrist-worn device designed specifically for comfortable elderly use. Four sensors record physiological signals continuously and transmit encrypted data wirelessly to the research backend every 30 seconds.</p>
+
+  <!-- device + sensors -->
+  <div class="device-section">
+    <div class="device-frame reveal d1">
+      <div class="wrist-scene">
+        <div class="wrist-arm"></div>
+        <div class="strap-top"></div>
+        <div class="strap-bot"><div class="strap-hole"></div></div>
+        <div class="device-body">
+          <div class="dev-sbtn"></div>
+          <div class="dev-screen">
+            <div class="dev-glow"></div>
+            <div class="dev-lbl">Heart rate</div>
+            <div class="dev-hr" id="devHR">72</div>
+            <div class="dev-lbl">bpm</div>
+            <div class="dev-bars">
+              <div class="dev-bar"></div><div class="dev-bar"></div><div class="dev-bar"></div>
+              <div class="dev-bar"></div><div class="dev-bar"></div><div class="dev-bar"></div>
+            </div>
+          </div>
+          <div class="sensor-row">
+            <div class="sdot sdot-g1"></div>
+            <div class="sdot sdot-g2"></div>
+            <div class="sdot sdot-r"></div>
+          </div>
+        </div>
+        <div class="ble-arcs">
+          <div class="ble-center"></div>
+          <div class="ble-arc"></div><div class="ble-arc"></div><div class="ble-arc"></div>
+        </div>
+      </div>
+      <div class="dev-label">
+        <div class="dev-name">WellSense Band v1.0</div>
+        <div class="dev-sub">BLE 5.0 · Continuous monitoring · 8hr battery</div>
+      </div>
+    </div>
+    <div class="specs-panel">
+      <div class="spec-card reveal d1"><div class="spec-icon si-teal">💚</div><div><div class="spec-name">PPG Sensor (Photoplethysmography)</div><div class="spec-desc">Green &amp; red LEDs measure heart rate and HRV — beat-to-beat intervals reveal cardiovascular stress responses and engagement levels.</div><div class="spec-tag">HR · HRV · SpO₂</div></div></div>
+      <div class="spec-card reveal d2"><div class="spec-icon si-blue">⚡</div><div><div class="spec-name">EDA Sensor (Electrodermal Activity)</div><div class="spec-desc">Dry electrodes on the inner wrist measure skin conductance. Detects sympathetic nervous system arousal — the body's hidden stress indicator.</div><div class="spec-tag">Skin conductance · Stress index</div></div></div>
+      <div class="spec-card reveal d3"><div class="spec-icon si-amber">🌡</div><div><div class="spec-name">Skin Temperature Sensor</div><div class="spec-desc">Infrared thermistor captures peripheral temperature changes. Drops correlate with stress-induced vasoconstriction — cold hands under anxiety.</div><div class="spec-tag">°C · Thermoregulation</div></div></div>
+      <div class="spec-card reveal d4"><div class="spec-icon si-red">📐</div><div><div class="spec-name">3-Axis Accelerometer</div><div class="spec-desc">Tracks wrist movement and activity levels throughout the event. Used to assess physical engagement and separate rest phases from active social interaction.</div><div class="spec-tag">Movement · Activity · Engagement</div></div></div>
+    </div>
+  </div>
+
+  <!-- registration flow -->
+  <div style="margin-top:48px;">
+    <div class="eyebrow" style="margin-bottom:14px;">Registration flow — event day</div>
+    <div class="steps-grid">
+      <div class="step-card pulse-step reveal d1">
+        <div class="step-num"><div class="step-ring"></div>🪪</div>
+        <div class="step-title">Arrive &amp; check in</div>
+        <div class="step-desc">Participant arrives at Hakametsä. Staff assigns session ID using only initials and age group — no full name required. Privacy first.</div>
+      </div>
+      <div class="step-card reveal d2">
+        <div class="step-num">📲</div>
+        <div class="step-title">Pair the band</div>
+        <div class="step-desc">Staff tablet auto-scans nearby WellSense devices via BLE. Band assigned to participant profile in one tap — under 20 seconds.</div>
+      </div>
+      <div class="step-card reveal d3">
+        <div class="step-num">✅</div>
+        <div class="step-title">Consent &amp; baseline</div>
+        <div class="step-desc">Participant gives verbal consent confirmed digitally. 2-minute seated baseline recorded — calibrates sensors to the individual.</div>
+      </div>
+      <div class="step-card reveal d4">
+        <div class="step-num pulse-step">📡</div>
+        <div class="step-title">Live monitoring</div>
+        <div class="step-desc">Data streams via BLE to the hub tablet then to the cloud every 30 seconds. The dashboard updates live for medical staff on-site.</div>
+      </div>
+    </div>
+  </div>
+</section></div>
+<div class="divider"><div class="divider-inner"></div></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  LIVE DASHBOARD
+════════════════════════════════════════════════════════════════ -->
+<div class="page" style="padding-bottom:70px;"><section id="dashboard-section" style="padding-bottom:0;">
+  <div class="eyebrow">Research monitoring tool</div>
+  <h2 class="sec-title">Live well-being <em>dashboard</em></h2>
+  <p class="sec-body">Medical staff and researchers monitor all participants in real time during the social event. Stress flags are raised automatically so the on-site doctor can check in discreetly — no disruption to the event.</p>
+
+  <div class="dash-wrapper reveal">
+    <!-- topbar -->
+    <div class="dash-topbar">
+      <div class="dtb-left">
+        <div class="dtb-logo">💚</div>
+        <div>
+          <div class="dtb-title">WellSense Monitor</div>
+        </div>
+      </div>
+      <div class="dtb-right">
+        <div class="dtb-chip">Community Social Event A — Hakametsä Hall 3</div>
+        <div class="dtb-chip" id="dashClock">--:--:--</div>
+        <div class="live-chip"><div class="pdot"></div>Live</div>
+      </div>
+    </div>
+
+    <!-- body -->
+    <div class="dash-body">
+      <!-- sidebar -->
+      <div class="dash-sidebar">
+        <div class="ds-label">Participants (12)</div>
+        <div class="pcard active" onclick="selectP(this,'P-004')"><div class="pc-row"><div class="pc-av" style="background:rgba(32,201,135,.15);color:#5fcfaa;">MH</div><div><div class="pc-name">Margaret H.</div><div class="pc-meta">P-004 · Age 74</div><div class="pc-pill pp-low">Low stress</div></div></div></div>
+        <div class="pcard" onclick="selectP(this,'P-007')"><div class="pc-row"><div class="pc-av" style="background:rgba(245,166,35,.15);color:#f0b549;">RK</div><div><div class="pc-name">Robert K.</div><div class="pc-meta">P-007 · Age 81</div><div class="pc-pill pp-mod">Moderate</div></div></div></div>
+        <div class="pcard" onclick="selectP(this,'P-011')"><div class="pc-row"><div class="pc-av" style="background:rgba(240,83,83,.15);color:#f07070;">DS</div><div><div class="pc-name">Dorothy S.</div><div class="pc-meta">P-011 · Age 77</div><div class="pc-pill pp-high">⚠ High stress</div></div></div></div>
+        <div class="pcard" onclick="selectP(this,'P-002')"><div class="pc-row"><div class="pc-av" style="background:rgba(78,156,245,.15);color:#74b3f0;">AM</div><div><div class="pc-name">Alice M.</div><div class="pc-meta">P-002 · Age 69</div><div class="pc-pill pp-stable">Stable</div></div></div></div>
+        <div class="pcard" onclick="selectP(this,'P-009')"><div class="pc-row"><div class="pc-av" style="background:rgba(32,201,135,.15);color:#5fcfaa;">HT</div><div><div class="pc-name">Harold T.</div><div class="pc-meta">P-009 · Age 83</div><div class="pc-pill pp-low">Low stress</div></div></div></div>
+        <div class="pcard" onclick="selectP(this,'P-001')"><div class="pc-row"><div class="pc-av" style="background:rgba(245,166,35,.15);color:#f0b549;">WB</div><div><div class="pc-name">William B.</div><div class="pc-meta">P-001 · Age 78</div><div class="pc-pill pp-mod">Moderate</div></div></div></div>
+        <div class="ds-summary">
+          <div class="dss-row"><span class="dss-k">Active sensors</span><span class="dss-v ok">12 / 12</span></div>
+          <div class="dss-row"><span class="dss-k">Avg. HR</span><span class="dss-v">71 bpm</span></div>
+          <div class="dss-row"><span class="dss-k">Flagged</span><span class="dss-v warn">1 participant</span></div>
+          <div class="dss-row"><span class="dss-k">Phase</span><span class="dss-v ok">Interaction</span></div>
+        </div>
+      </div>
+
+      <!-- content -->
+      <div class="dash-content">
+        <div class="alert-strip" id="alertStrip">
+          <div class="alert-icon">!</div>
+          <div><strong>Dorothy S. (P-011)</strong> — elevated stress indicators. EDA spike + elevated HR. Consider discreet check-in.</div>
+        </div>
+        <div class="dc-header">
+          <div><div class="dc-title" id="dcName">Margaret H.</div><div class="dc-meta" id="dcMeta">P-004 · Female · Age 74 · Band #W-12</div></div>
+          <div class="dc-btns"><button class="dc-btn">Export report</button><button class="dc-btn">Flag for check-in</button></div>
+        </div>
+        <div class="phase-legend">
+          <div class="ph-i"><div class="ph-d" style="background:rgba(78,156,245,.45);"></div>Baseline</div>
+          <div class="ph-i"><div class="ph-d" style="background:var(--teal);"></div>Interaction</div>
+          <div class="ph-i"><div class="ph-d" style="background:rgba(245,166,35,.35);"></div>Recovery</div>
+        </div>
+        <div class="phase-bar"><div class="pb-base" style="flex:2;"></div><div class="pb-int" style="flex:5;"></div><div class="pb-rec" style="flex:1;opacity:.4;"></div></div>
+        <div class="phase-times"><span>09:00</span><span>09:20</span><span>09:40</span><span>10:00</span><span>10:20</span><span>10:40 →</span></div>
+        <div class="metrics-grid">
+          <div class="mc"><div class="mc-lbl">Heart rate</div><div class="mc-val" id="mHR">68 <span class="mc-unit">bpm</span></div><div class="mc-delta du" id="dHR">↑ 4 from baseline</div></div>
+          <div class="mc"><div class="mc-lbl">HRV (RMSSD)</div><div class="mc-val" id="mHRV">42 <span class="mc-unit">ms</span></div><div class="mc-delta du" id="dHRV">↑ good variability</div></div>
+          <div class="mc"><div class="mc-lbl">Skin conductance</div><div class="mc-val" id="mEDA">1.8 <span class="mc-unit">μS</span></div><div class="mc-delta" id="dEDA">↔ within normal</div></div>
+          <div class="mc"><div class="mc-lbl">Skin temp</div><div class="mc-val" id="mTemp">33.2 <span class="mc-unit">°C</span></div><div class="mc-delta dw" id="dTemp">↑ slightly elevated</div></div>
+        </div>
+        <div class="tab-row">
+          <div class="tab active" onclick="setTab(this,'signals')">Signals</div>
+          <div class="tab" onclick="setTab(this,'assessment')">Assessment</div>
+          <div class="tab" onclick="setTab(this,'group')">Group view</div>
+        </div>
+        <div id="tab-signals">
+          <div class="charts-row">
+            <div class="chart-card"><div class="chart-title">Heart rate — live</div><div class="chart-wrap"><canvas id="hrChart"></canvas></div></div>
+            <div class="chart-card"><div class="chart-title">Skin conductance (EDA)</div><div class="chart-wrap"><canvas id="edaChart"></canvas></div></div>
+          </div>
+          <div class="charts-row">
+            <div class="chart-card"><div class="chart-title">HRV over session</div><div class="chart-wrap"><canvas id="hrvChart"></canvas></div></div>
+            <div class="chart-card"><div class="chart-title">Movement intensity</div><div class="chart-wrap"><canvas id="accelChart"></canvas></div></div>
+          </div>
+        </div>
+        <div id="tab-assessment" style="display:none;">
+          <div class="charts-row">
+            <div class="chart-card" style="display:flex;align-items:center;gap:14px;padding:16px;">
+              <div style="width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;border:2px solid;" id="stressDial" class="dial-low">Low</div>
+              <div><div style="font-size:9px;color:var(--text3);margin-bottom:4px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;">Stress level</div><div style="font-size:11px;color:var(--text2);line-height:1.5;" id="stressNote">Physiological indicators within normal range. No intervention needed.</div></div>
+            </div>
+            <div class="chart-card" style="display:flex;align-items:center;gap:14px;padding:16px;">
+              <div style="width:58px;height:58px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;border:2px solid;background:var(--blue-bg);border-color:var(--blue);color:#74b3f0;" id="engDial">Active</div>
+              <div><div style="font-size:9px;color:var(--text3);margin-bottom:4px;font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;">Engagement</div><div style="font-size:11px;color:var(--text2);line-height:1.5;">Participant actively engaged. Good social interaction signals detected throughout session.</div></div>
+            </div>
+          </div>
+          <div class="chart-card" style="margin-top:0;"><div class="chart-title">Phase comparison — key biomarkers</div><div style="position:relative;height:130px;"><canvas id="compareChart"></canvas></div></div>
+        </div>
+        <div id="tab-group" style="display:none;">
+          <div class="group-section" style="margin-top:0;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;">All 12 participants — heart rate &amp; stress status</div>
+            <div class="group-grid" id="groupGrid"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section></div>
+<div class="divider"><div class="divider-inner"></div></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  IMPACT
+════════════════════════════════════════════════════════════════ -->
+<div class="page"><section id="impact">
+  <div class="eyebrow">Expected outcomes</div>
+  <h2 class="sec-title">What we hope to <em>prove</em></h2>
+  <p class="sec-body">Beyond the event itself, the physiological data collected provides objective evidence that structured social interaction measurably improves elderly well-being — findings that can shape city policy in Tampere and beyond.</p>
+  <div class="impact-row">
+    <div class="impact-card reveal d1"><div class="impact-num" style="color:var(--teal);">↓</div><div class="impact-lbl">Stress biomarkers during social interaction vs. isolation baseline</div></div>
+    <div class="impact-card reveal d2"><div class="impact-num" style="color:var(--blue);">↑</div><div class="impact-lbl">HRV improvement — a cardiac marker of psychological safety and calm</div></div>
+    <div class="impact-card reveal d3"><div class="impact-num" style="color:var(--amber);">📋</div><div class="impact-lbl">Anonymised research dataset on loneliness and physiological health</div></div>
+    <div class="impact-card reveal d4"><div class="impact-num" style="color:var(--rose);">🏙️</div><div class="impact-lbl">Policy recommendations for Tampere City elderly care programmes</div></div>
+  </div>
+  <div style="margin-top:44px;">
+    <div class="eyebrow" style="margin-bottom:18px;">Project timeline</div>
+    <div class="timeline">
+      <div class="tl-item reveal d1"><div class="tl-phase">Phase 1 — Complete</div><div class="tl-name">Community networking at Hakametsä</div><div class="tl-desc">Team visited Hakametsä Sports Centre, spoke with elderly residents and medical professionals. Identified loneliness and unspoken depression as the primary challenges to address.</div></div>
+      <div class="tl-item reveal d2"><div class="tl-phase">Phase 2 — In progress</div><div class="tl-name">Partnership formation &amp; event planning</div><div class="tl-desc">Collaborations established with City of Tampere, Pirha, Hakametsä, and NYSSE. Event format confirmed: informal social gathering with free coffee, pulla, and on-site medical staff.</div></div>
+      <div class="tl-item reveal d3"><div class="tl-phase">Phase 3 — Engineering</div><div class="tl-name">Wearable device &amp; dashboard development</div><div class="tl-desc">Design and prototype of the WellSense Band, staff registration app, cloud data pipeline, and real-time monitoring dashboard. Ethics review and GDPR compliance for data collection.</div></div>
+      <div class="tl-item reveal d4"><div class="tl-phase">Phase 4 — Upcoming</div><div class="tl-name">Social event &amp; live data collection</div><div class="tl-desc">The event is held at Hakametsä. Participants arrive, register voluntarily, and enjoy the gathering while biosignals are collected. Medical staff are present throughout. NYSSE provides free transport.</div></div>
+      <div class="tl-item reveal"><div class="tl-phase">Phase 5 — Research output</div><div class="tl-name">Data analysis &amp; publication</div><div class="tl-desc">Physiological data analysed to quantify the effect of structured social interaction on elderly well-being. Findings shared with Tampere University and city partners to inform future programmes.</div></div>
+    </div>
+  </div>
+</section></div>
+
+<!-- ════════════════════════════════════════════════════════════════
+  FOOTER
+════════════════════════════════════════════════════════════════ -->
+<footer>
+  <div class="ft-label">Project partners &amp; collaborators</div>
+  <div class="partner-logos">
+    <div class="pl-chip">🎓 Tampere University</div>
+    <div class="pl-chip">🏙️ City of Tampere</div>
+    <div class="pl-chip">🏥 Pirha Healthcare</div>
+    <div class="pl-chip">🏊 Hakametsä Sports Centre</div>
+    <div class="pl-chip">🚌 NYSSE Transport</div>
+  </div>
+  <div class="ft-note">WellSense Tampere · Elderly Well-Being Initiative 2025 · Tampere University Biomedical Engineering</div>
+</footer>
+
+<style>
+.dial-low{background:var(--teal-bg);border-color:var(--teal)!important;color:#5fcfaa}
+.dial-mod{background:var(--amber-bg);border-color:var(--amber)!important;color:#f0b549}
+.dial-high{background:var(--red-bg);border-color:var(--red)!important;color:#f07070}
+</style>
+
+<script>
+// ── Scroll reveal ──────────────────────────────────────────────────
+const observer=new IntersectionObserver(entries=>{entries.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')})},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el));
+
+// ── Nav ────────────────────────────────────────────────────────────
+function goTo(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'})}
+const secIds=['hero','problem','event','device','dashboard-section','impact'];
+window.addEventListener('scroll',()=>{
+  const y=window.scrollY+80;
+  let cur='hero';
+  secIds.forEach(id=>{const el=document.getElementById(id);if(el&&y>=el.offsetTop)cur=id;});
+  document.querySelectorAll('.nav-link').forEach(l=>{
+    const t=l.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+    l.classList.toggle('active',t===cur);
+  });
+});
+
+// ── Clock ──────────────────────────────────────────────────────────
+function tick(){document.getElementById('dashClock').textContent=new Date().toLocaleTimeString('en-GB')}
+setInterval(tick,1000);tick();
+
+// ── Device HR live ─────────────────────────────────────────────────
+let dhr=72;
+setInterval(()=>{dhr+=Math.round((Math.random()-.48)*2);dhr=Math.max(58,Math.min(88,dhr));const e=document.getElementById('devHR');if(e)e.textContent=dhr;},1800);
+
+// ── Participant data ───────────────────────────────────────────────
+const pData={
+  'P-004':{name:'Margaret H.',meta:'P-004 · Female · Age 74 · Band #W-12',hr:68,hrv:42,eda:1.8,temp:33.2,dhr:['du','↑ 4 from baseline'],dhrv:['du','↑ good variability'],deda:['','↔ within normal'],dtemp:['dw','↑ slightly elevated'],stress:'low',sLabel:'Low',sNote:'Physiological indicators within normal range. No intervention needed.',eng:'Active',alert:false},
+  'P-007':{name:'Robert K.',meta:'P-007 · Male · Age 81 · Band #W-07',hr:82,hrv:28,eda:3.4,temp:33.8,dhr:['dw','↑ 18 from baseline'],dhrv:['dw','↓ reduced variability'],deda:['dw','↑ elevated arousal'],dtemp:['dw','↑ elevated'],stress:'mod',sLabel:'Moderate',sNote:'Moderate physiological arousal. Monitor for continued elevation.',eng:'Active',alert:false},
+  'P-011':{name:'Dorothy S.',meta:'P-011 · Female · Age 77 · Band #W-03',hr:94,hrv:16,eda:6.1,temp:34.5,dhr:['dd','↑ 29 from baseline'],dhrv:['dd','↓ very low variability'],deda:['dd','↑ significant spike'],dtemp:['dd','↑ elevated'],stress:'high',sLabel:'High',sNote:'⚠ Elevated stress. EDA spike + tachycardia detected. Discreet check-in recommended.',eng:'Passive',alert:true},
+  'P-002':{name:'Alice M.',meta:'P-002 · Female · Age 69 · Band #W-09',hr:67,hrv:46,eda:1.5,temp:32.9,dhr:['','↔ at baseline'],dhrv:['du','↑ excellent variability'],deda:['','↔ within normal'],dtemp:['','↔ normal'],stress:'low',sLabel:'Low',sNote:'All signals stable. Excellent physiological profile throughout session.',eng:'Active',alert:false},
+  'P-009':{name:'Harold T.',meta:'P-009 · Male · Age 83 · Band #W-05',hr:66,hrv:38,eda:1.9,temp:33.1,dhr:['du','↑ 2 from baseline'],dhrv:['du','↑ good'],deda:['','↔ within normal'],dtemp:['','↔ normal'],stress:'low',sLabel:'Low',sNote:'Relaxed physiological state. High social engagement observed throughout.',eng:'Active',alert:false},
+  'P-001':{name:'William B.',meta:'P-001 · Male · Age 78 · Band #W-01',hr:74,hrv:32,eda:2.9,temp:33.5,dhr:['dw','↑ 10 from baseline'],dhrv:['dw','↓ slightly reduced'],deda:['dw','↑ mild arousal'],dtemp:['dw','↑ slightly elevated'],stress:'mod',sLabel:'Moderate',sNote:'Mild arousal — likely social excitement. Continue monitoring.',eng:'Active',alert:false},
+};
+const allP=[{id:'P-001',hr:74,s:'mod'},{id:'P-002',hr:67,s:'stable'},{id:'P-003',hr:71,s:'low'},{id:'P-004',hr:68,s:'low'},{id:'P-005',hr:79,s:'mod'},{id:'P-006',hr:65,s:'low'},{id:'P-007',hr:82,s:'mod'},{id:'P-008',hr:70,s:'stable'},{id:'P-009',hr:66,s:'low'},{id:'P-010',hr:73,s:'stable'},{id:'P-011',hr:94,s:'high'},{id:'P-012',hr:77,s:'mod'}];
+
+// group grid
+const gg=document.getElementById('groupGrid');
+const pillMap={high:'pp-high',mod:'pp-mod',stable:'pp-stable',low:'pp-low'};
+const lblMap={high:'⚠ High',mod:'Mod',stable:'Stable',low:'Low'};
+allP.forEach(p=>{
+  const c=document.createElement('div');c.className='group-cell';
+  c.innerHTML=`<div class="gc-id">${p.id}</div><div class="gc-hr">${p.hr}</div><div class="pc-pill ${pillMap[p.s]}" style="display:inline-flex;font-size:8px;">${lblMap[p.s]}</div>`;
+  gg.appendChild(c);
+});
+
+// participant select
+function selectP(el,pid){
+  document.querySelectorAll('.pcard').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const d=pData[pid]||pData['P-004'];
+  document.getElementById('dcName').textContent=d.name;
+  document.getElementById('dcMeta').textContent=d.meta;
+  document.getElementById('mHR').innerHTML=d.hr+' <span class="mc-unit">bpm</span>';
+  document.getElementById('mHRV').innerHTML=d.hrv+' <span class="mc-unit">ms</span>';
+  document.getElementById('mEDA').innerHTML=d.eda.toFixed(1)+' <span class="mc-unit">μS</span>';
+  document.getElementById('mTemp').innerHTML=d.temp.toFixed(1)+' <span class="mc-unit">°C</span>';
+  const sd=(id,arr)=>{const e=document.getElementById(id);e.className='mc-delta '+arr[0];e.textContent=arr[1]};
+  sd('dHR',d.dhr);sd('dHRV',d.dhrv);sd('dEDA',d.deda);sd('dTemp',d.dtemp);
+  const dial=document.getElementById('stressDial');
+  dial.className=d.stress==='high'?'dial-high':d.stress==='mod'?'dial-mod':'dial-low';
+  dial.textContent=d.sLabel;
+  document.getElementById('stressNote').textContent=d.sNote;
+  document.getElementById('engDial').textContent=d.eng;
+  document.getElementById('alertStrip').style.display=d.alert?'flex':'none';
+  updateCharts(d);
+}
+
+// tabs
+function setTab(el,tab){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['signals','assessment','group'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'':'none';
+  });
+}
+
+// charts
+const charts={};
+const N=38;
+function gen(base,noise,n){const d=[];let v=base;for(let i=0;i<n;i++){v+=(Math.random()-.48)*noise;v=Math.max(base-noise*4,Math.min(base+noise*4,v));d.push(+v.toFixed(1));}return d;}
+function mkChart(id,data,color,yMin,yMax){
+  if(charts[id]){charts[id].destroy();delete charts[id];}
+  charts[id]=new Chart(document.getElementById(id),{
+    type:'line',
+    data:{labels:Array(N).fill(''),datasets:[{data,borderColor:color,borderWidth:1.5,pointRadius:0,tension:0.4,fill:true,backgroundColor:color+'18'}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:false}},scales:{x:{display:false},y:{min:yMin,max:yMax,display:true,grid:{color:'rgba(255,255,255,0.04)'},ticks:{font:{size:8},color:'#3a4157',maxTicksLimit:4}}}}
+  });
+}
+function mkCompare(d){
+  if(charts['compareChart']){charts['compareChart'].destroy();delete charts['compareChart'];}
+  charts['compareChart']=new Chart(document.getElementById('compareChart'),{
+    type:'bar',
+    data:{labels:['HR (bpm)','HRV (ms)','EDA×10','Temp×10'],datasets:[
+      {label:'Baseline',data:[d.hr-4,d.hrv+4,+(d.eda*.7*10).toFixed(0),+(d.temp*.99*10).toFixed(0)],backgroundColor:'rgba(78,156,245,.28)',borderColor:'#4e9cf5',borderWidth:1},
+      {label:'Interaction',data:[d.hr,d.hrv,+(d.eda*10).toFixed(0),+(d.temp*10).toFixed(0)],backgroundColor:'rgba(32,201,135,.3)',borderColor:'#20c987',borderWidth:1}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{display:true,position:'top',labels:{font:{size:8},boxWidth:8,color:'#7b85a0',padding:10}}},scales:{x:{ticks:{font:{size:8},color:'#3a4157'},grid:{color:'rgba(255,255,255,0.04)'}},y:{ticks:{font:{size:8},color:'#3a4157',maxTicksLimit:4},grid:{color:'rgba(255,255,255,0.04)'}}}}
+  });
+}
+function updateCharts(d){
+  mkChart('hrChart',gen(d.hr,2,N),'#20c987',d.hr-14,d.hr+14);
+  mkChart('edaChart',gen(d.eda,.15,N),'#4e9cf5',0,d.eda*2.5);
+  mkChart('hrvChart',gen(d.hrv,3,N),'#f5a623',d.hrv-18,d.hrv+18);
+  mkChart('accelChart',gen(30,8,N).map(Math.abs),'#a78bfa',0,80);
+  mkCompare(d);
+}
+setTimeout(()=>updateCharts(pData['P-004']),120);
+
+// live tick
+setInterval(()=>{
+  ['hrChart','edaChart'].forEach(id=>{
+    if(!charts[id])return;
+    const ds=charts[id].data.datasets[0].data;
+    const last=ds[ds.length-1];ds.shift();
+    const noise=id==='hrChart'?1.5:0.09;
+    const opts=charts[id].options.scales.y;
+    let next=Math.max(opts.min,Math.min(opts.max,last+(Math.random()-.48)*noise));
+    ds.push(+next.toFixed(1));
+    charts[id].update('none');
+  });
+},1000);
+</script>
+</body>
+</html>
